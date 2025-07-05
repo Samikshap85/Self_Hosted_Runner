@@ -27,15 +27,9 @@ jobs:
           node-version: "20"
           cache: 'yarn'
           cache-dependency-path: ./frontend/yarn.lock
-      - name: Install Commitlint
-        run: |
-          npm install --save-dev @commitlint/cli @commitlint/config-conventional
-      - name: Add commitlint config
-        run: |
-          echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
       - name: Run Commitlint
         run: |
-          git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint
+          git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint || exit 1
   check_lint:
     runs-on: [frontend]
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature') && github.base_ref == 'dev'
