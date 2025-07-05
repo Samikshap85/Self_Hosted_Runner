@@ -54,6 +54,7 @@ jobs:
       - name: Run lint on frontend
         working-directory: ./frontend
         run: yarn lint
+  
   build_docker:
     runs-on: [frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'

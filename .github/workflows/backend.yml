@@ -66,6 +66,7 @@ jobs:
       - name: Run lint on backend2
         working-directory: ./backend2
         run: yarn lint
+  
   build_docker:
     runs-on: [backend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
