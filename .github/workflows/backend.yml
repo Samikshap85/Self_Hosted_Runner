@@ -12,10 +12,12 @@ on:
       - 'backend1/**'
       - 'backend2/**'
   workflow_dispatch:
+
 env:
   REGISTRY: docker.io
   BACKEND1_IMAGE_NAME: samikshap85/backend1
   BACKEND2_IMAGE_NAME: samikshap85/backend2
+
 jobs:
   commitlint:
     runs-on: ubuntu-latest
