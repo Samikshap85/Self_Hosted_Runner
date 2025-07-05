@@ -11,6 +11,7 @@ on:
     paths:
       - 'backend1/**'
       - 'backend2/**'
+  workflow_dispatch:
 env:
   REGISTRY: docker.io
   BACKEND1_IMAGE_NAME: samikshap85/backend1
