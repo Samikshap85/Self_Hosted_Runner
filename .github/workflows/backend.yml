@@ -28,6 +28,7 @@ jobs:
 
       - name: Conventional Commit Check
         uses: wagoid/commitlint-github-action@v5
+      
       # - name: Set up Node.js
       #   uses: actions/setup-node@v4
       #   with:
@@ -45,6 +46,7 @@ jobs:
       # - name: Run Commitlint
       #   run: |
       #     git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint
+  
   check_lint:
     runs-on: [backend]
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature') && github.base_ref == 'dev'
