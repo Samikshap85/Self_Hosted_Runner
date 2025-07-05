@@ -93,6 +93,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-frontend
           cache-to: type=local,dest=/tmp/.buildx-cache-frontend
       
+      
       - name: Save frontend Docker Image as tar
         if: github.event_name == 'push'
         run: docker save ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-${{ github.sha }} -o frontend.tar

@@ -127,25 +127,53 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-backend2
           cache-to: type=local,dest=/tmp/.buildx-cache-backend2
-      
-      - name: Save backend1 Docker Image as tar
-        if: github.event_name == 'push'
+    
+
+   
+      - name: Rebuild backend1 image locally for save
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} ./backend1
+
+      - name: Save backend1 Docker image as tar
         run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} -o backend1.tar
 
       - name: Upload backend1 Image Artifact
-        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: backend1-image
-          path: backend1.tar
-      
-      - name: Save backend2 Docker Image as tar
-        if: github.event_name == 'push'
+        name: backend1-image
+        path: backend1.tar
+
+    
+      - name: Rebuild backend2 image locally for save
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} ./backend2
+
+      - name: Save backend2 Docker image as tar
         run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} -o backend2.tar
 
       - name: Upload backend2 Image Artifact
-        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: backend2-image
-          path: backend2.tar
+        name: backend2-image
+        path: backend2.tar
+
+      
+      # - name: Save backend1 Docker Image as tar
+      #   if: github.event_name == 'push'
+      #   run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} -o backend1.tar
+
+      # - name: Upload backend1 Image Artifact
+      #   if: github.event_name == 'push'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: backend1-image
+      #     path: backend1.tar
+      
+      # - name: Save backend2 Docker Image as tar
+      #   if: github.event_name == 'push'
+      #   run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} -o backend2.tar
+
+      # - name: Upload backend2 Image Artifact
+      #   if: github.event_name == 'push'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: backend2-image
+      #     path: backend2.tar
