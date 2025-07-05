@@ -52,4 +52,4 @@ export default tseslint.config({
   },
 })
 ```
-## Thank you
+## Thank you updated
