@@ -9,6 +9,7 @@ on:
       - dev
     paths:
       - 'frontend/**'
+  workflow_dispatch
 env:
   REGISTRY: docker.io
   FRONTEND_IMAGE_NAME: samikshap85/frontend
