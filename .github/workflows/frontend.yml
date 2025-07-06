@@ -84,6 +84,14 @@ jobs:
       - name: Build Frontend App
         working-directory: ./frontend
         run: yarn install && yarn build
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
+          publish_branch: gh-pages
+          destination_dir: ./
 
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
@@ -97,16 +105,17 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-frontend
           cache-to: type=local,dest=/tmp/.buildx-cache-frontend
-        
+      
+      
       - name: Save frontend build artifact
         run: |
           mkdir -p artifacts/frontend
           find frontend/dist -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/frontend/ \;
 
-       
-      
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-artifact
           path: artifacts/frontend
+      
+      
