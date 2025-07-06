@@ -3,7 +3,7 @@ name: Trivy Security Scan
 on:
   push:
     branches: [dev]
-  worflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   trivy-scan:
