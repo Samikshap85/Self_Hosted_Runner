@@ -101,7 +101,7 @@ jobs:
       - name: Save frontend build artifact
         run: |
           mkdir -p artifacts/frontend
-          find frontend/dist -type f ! -name '*:*' -exec cp --parents {} artifacts/frontend/ \;
+          find frontend/dist -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/frontend/ \;
 
          # cp -r frontend/dist/* artifacts/frontend/
       
