@@ -20,7 +20,7 @@ env:
 
 jobs:
   commitlint:
-    runs-on: ubuntu-latest
+    runs-on: [backend]
     if: github.event_name == 'pull_request' && (github.head_ref == 'feature' || startsWith(github.head_ref, 'feature/')) && github.base_ref == 'dev'
     steps:
       - name: Checkout code
@@ -108,7 +108,7 @@ jobs:
           context: ./backend1
           file: ./backend1/Dockerfile
           push: true
-          load: true
+          # load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest
@@ -121,39 +121,62 @@ jobs:
           context: ./backend2
           file: ./backend2/Dockerfile
           push: true
-          load: true
+          # load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-backend2
           cache-to: type=local,dest=/tmp/.buildx-cache-backend2
     
-
-   
-      - name: Rebuild backend1 image locally for save
-        run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} ./backend1
-
-      - name: Save backend1 Docker image as tar
-        run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} -o backend1.tar
-
-      - name: Upload backend1 Image Artifact
+      - name: Save backend1 source artifact
+        run: |
+          mkdir -p artifacts/backend1
+          cp -r backend1/src/* artifacts/backend1/
+    
+      - name: Save backend2 source artifact
+        run: |
+          mkdir -p artifacts/backend2
+          cp -r backend2/src/* artifacts/backend2/
+    
+      - name: Upload backend1 artifact
         uses: actions/upload-artifact@v4
         with:
-        name: backend1-image
-        path: backend1.tar
+        name: backend1-artifact
+        path: artifacts/backend1
+
+      - name: Upload backend2 artifact
+        uses: actions/upload-artifact@v4
+        with:
+        name: backend2-artifact
+        path: artifacts/backend2
+
+
+
+      #------------------------------------------------------------------------------------------#
+      # - name: Rebuild backend1 image locally for save
+      #   run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} ./backend1
+
+      # - name: Save backend1 Docker image as tar
+      #   run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }} -o backend1.tar
+
+      # - name: Upload backend1 Image Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #   name: backend1-image
+      #   path: backend1.tar
 
     
-      - name: Rebuild backend2 image locally for save
-        run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} ./backend2
+      # - name: Rebuild backend2 image locally for save
+      #   run: docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} ./backend2
 
-      - name: Save backend2 Docker image as tar
-        run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} -o backend2.tar
+      # - name: Save backend2 Docker image as tar
+      #   run: docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }} -o backend2.tar
 
-      - name: Upload backend2 Image Artifact
-        uses: actions/upload-artifact@v4
-        with:
-        name: backend2-image
-        path: backend2.tar
+      # - name: Upload backend2 Image Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #   name: backend2-image
+      #   path: backend2.tar
 
       
       # - name: Save backend1 Docker Image as tar

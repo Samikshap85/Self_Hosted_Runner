@@ -80,27 +80,33 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          load: true
+          # load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-frontend
           cache-to: type=local,dest=/tmp/.buildx-cache-frontend
+        
+      - name: Save frontend build artifact
+        run: |
+          mkdir -p artifacts/frontend
+          cp -r frontend/dist/* artifacts/frontend/
+#--------------------------------------------------------------------------------------------------------#
       
-      
-      - name: Save frontend Docker Image as tar
-        if: github.event_name == 'push'
-        run: docker save ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-${{ github.sha }} -o frontend.tar
+      # - name: Save frontend Docker Image as tar
+      #   if: github.event_name == 'push'
+      #   run: docker save ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-${{ github.sha }} -o frontend.tar
 
-      - name: Upload frontend Image Artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-image
-          path: frontend.tar
+      # - name: Upload frontend Image Artifact
+      #   if: github.event_name == 'push'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: frontend-image
+      #     path: frontend.tar
