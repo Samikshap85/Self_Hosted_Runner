@@ -98,6 +98,12 @@ jobs:
         run: |
           mkdir -p artifacts/frontend
           cp -r frontend/dist/* artifacts/frontend/
+      
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-artifact
+          path: artifacts/frontend
 #--------------------------------------------------------------------------------------------------------#
       
       # - name: Save frontend Docker Image as tar
