@@ -15,9 +15,15 @@ jobs:
 
       - name: Install Trivy (Fedora)
         run: |
-          sudo dnf install -y wget rpm
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.64.1/trivy_0.64.1_Linux-64bit.rpm
-          sudo rpm -Uvh trivy_0.64.1_Linux-64bit.rpm
+          if ! command -v trivy &> /dev/null; then
+            echo " Installing Trivy..."
+            sudo dnf install -y wget rpm
+            wget https://github.com/aquasecurity/trivy/releases/download/v0.64.1/trivy_0.64.1_Linux-64bit.rpm
+            sudo rpm -Uvh trivy_0.64.1_Linux-64bit.rpm
+          else
+            echo " Trivy is already installed. Skipping installation."
+          fi
+
 
       - name: Download Trivy HTML template
         run: |
