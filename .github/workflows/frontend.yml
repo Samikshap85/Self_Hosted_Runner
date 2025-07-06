@@ -83,6 +83,8 @@ jobs:
       
       - name: Build Frontend App
         working-directory: ./frontend
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
         run: yarn install && yarn build
       
       - name: Deploy to GitHub Pages
