@@ -131,12 +131,16 @@ jobs:
       - name: Save backend1 source artifact
         run: |
           mkdir -p artifacts/backend1
-          cp -r backend1/src/* artifacts/backend1/
+          find backend1/src -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/backend1/ \;
+         # cp -r backend1/src/* artifacts/backend1/
+          
     
       - name: Save backend2 source artifact
         run: |
           mkdir -p artifacts/backend2
-          cp -r backend2/src/* artifacts/backend2/
+          find backend2/src -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/backend2/ \;
+
+        # cp -r backend2/src/* artifacts/backend2/
     
       - name: Upload backend1 artifact
         uses: actions/upload-artifact@v4

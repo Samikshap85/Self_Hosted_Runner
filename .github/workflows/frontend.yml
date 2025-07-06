@@ -81,6 +81,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       
+      - name: Build Frontend App
+        working-directory: ./frontend
+        run: yarn install && yarn build
+
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
@@ -97,7 +101,9 @@ jobs:
       - name: Save frontend build artifact
         run: |
           mkdir -p artifacts/frontend
-          cp -r frontend/dist/* artifacts/frontend/
+          find frontend/dist -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/frontend/ \;
+
+         # cp -r frontend/dist/* artifacts/frontend/
       
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
