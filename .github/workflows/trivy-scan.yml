@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo dnf install -y wget rpm
           wget https://github.com/aquasecurity/trivy/releases/download/v0.64.1/trivy_0.64.1_Linux-64bit.rpm
-          sudo rpm -ivh trivy_0.64.1_Linux-64bit.rpm
+          sudo rpm -Uvh trivy_0.64.1_Linux-64bit.rpm
 
       - name: Download Trivy HTML template
         run: |
