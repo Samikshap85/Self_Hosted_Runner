@@ -1,0 +1,61 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches: [dev]
+  worflow_dispatch:
+
+jobs:
+  trivy-scan:
+    runs-on: [frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget -y
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+      
+      - name: Run Trivy scan on backend1 image
+        run: |
+          mkdir -p trivy-reports
+          trivy image --format html --output trivy-reports/backend1.html docker.io/samikshap85/backend1:dev-latest
+
+      - name: Run Trivy scan on backend2 image
+        run: |
+          trivy image --format html --output trivy-reports/backend2.html docker.io/samikshap85/backend2:dev-latest
+
+      - name: Run Trivy scan on frontend image
+        run: |
+          trivy image --format html --output trivy-reports/frontend.html docker.io/samikshap85/frontend:dev-latest
+
+      - name: Upload Trivy reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-html-reports
+          path: trivy-reports
+      
+      - name: Create index page for scan reports
+        run: |
+          echo "<h1>Trivy Scan Reports</h1><ul>" > trivy-reports/index.html
+          for f in backend1.html backend2.html frontend.html; do
+            echo "<li><a href='$f'>$f</a></li>" >> trivy-reports/index.html
+          done
+          echo "</ul>" >> trivy-reports/index.html
+
+      - name: Deploy scan reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./trivy-reports
+          publish_branch: gh-pages
+          destination_dir: scan
+      
+      
+
+
+      
