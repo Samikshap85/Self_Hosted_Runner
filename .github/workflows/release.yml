@@ -5,19 +5,19 @@ on:
     branches:
       - main
   
-REGISTRY: docker.io
-  BACKEND1_IMAGE_NAME: samikshap85/backend1
-  BACKEND2_IMAGE_NAME: samikshap85/backend2
-  FRONTEND_IMAGE_NAME: samikshap85/frontend
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: docker.io
+      BACKEND1_IMAGE_NAME: samikshap85/backend1
+      BACKEND2_IMAGE_NAME: samikshap85/backend2
+      FRONTEND_IMAGE_NAME: samikshap85/frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-         fetch-depth: 0
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
