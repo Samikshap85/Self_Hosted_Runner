@@ -108,7 +108,7 @@ jobs:
           context: ./backend1
           file: ./backend1/Dockerfile
           push: true
-          # load: true
+          load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest
@@ -116,7 +116,10 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-backend1
       
       #.....................creating artifacts of docker images and uploading in tar......................................#
-         
+
+      - name: Pull backend1 image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest   
+      
       - name: Save Docker image for backend1
         run: |
           docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest -o backend1.tar
@@ -137,7 +140,7 @@ jobs:
           context: ./backend2
           file: ./backend2/Dockerfile
           push: true
-          # load: true
+          load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest
@@ -145,6 +148,10 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-backend2
 
         #-----------------------------------------#
+      
+      - name: Pull backend2 image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest 
+      
       - name: Save Docker image for backend2
         run: |
           docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest -o backend2.tar
