@@ -134,4 +134,25 @@ jobs:
           name: frontend-artifact
           path: artifacts/frontend
       
+      #---------------------------------------------------------------#
+      
+      - name: Download frontend image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-image
+          path: public/artifacts/
+      
+      - name: Download backend1 image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend1-image
+          path: public/artifacts/
+
+      - name: Download backend2 image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend2-image
+          path: public/artifacts/
+
+      
       

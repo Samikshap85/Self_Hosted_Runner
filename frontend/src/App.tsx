@@ -49,6 +49,13 @@ function App() {
                               redirectUrl="/blogs/create"
                               signInOptions={{ strategy: "oauth_google" }}
                             >
+                              <div>
+                              <h2>Download Docker Images</h2>
+                              <a href="/artifacts/frontend.tar" download>Download Frontend Image</a>
+                              <a href="/artifacts/backend1.tar" download>Download Backend1 Image</a><br />
+                              <a href="/artifacts/backend2.tar" download>Download Backend2 Image</a>
+                                </div>
+
                               <Button
                                 variant="contained"
                                 color="primary"
