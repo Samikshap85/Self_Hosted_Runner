@@ -11,36 +11,44 @@ on:
     paths:
       - 'backend1/**'
       - 'backend2/**'
+  workflow_dispatch:
+
 env:
   REGISTRY: docker.io
   BACKEND1_IMAGE_NAME: samikshap85/backend1
   BACKEND2_IMAGE_NAME: samikshap85/backend2
+
 jobs:
   commitlint:
-    runs-on: ubuntu-latest
+    runs-on: [backend]
     if: github.event_name == 'pull_request' && (github.head_ref == 'feature' || startsWith(github.head_ref, 'feature/')) && github.base_ref == 'dev'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: 'yarn'
-          cache-dependency-path: |
-            ./backend1/yarn.lock
-            ./backend2/yarn.lock
-      - name: Install Commitlint
-        run: |
-          npm install --save-dev @commitlint/cli @commitlint/config-conventional
-      - name: Add commitlint config
-        run: |
-          echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
-      - name: Run Commitlint
-        run: |
-          git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint
+
+      - name: Conventional Commit Check
+        uses: wagoid/commitlint-github-action@v5
+      
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: "20"
+      #     cache: 'yarn'
+      #     cache-dependency-path: |
+      #       ./backend1/yarn.lock
+      #       ./backend2/yarn.lock
+      # - name: Install Commitlint
+      #   run: |
+      #     npm install --save-dev @commitlint/cli @commitlint/config-conventional
+      # - name: Add commitlint config
+      #   run: |
+      #     echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
+      # - name: Run Commitlint
+      #   run: |
+      #     git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint
+  
   check_lint:
     runs-on: [backend]
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature') && github.base_ref == 'dev'
@@ -60,6 +68,7 @@ jobs:
       - name: Run lint on backend2
         working-directory: ./backend2
         run: yarn lint
+  
   build_docker:
     runs-on: [backend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
@@ -68,6 +77,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
       
       - name: Cache docker layers for backend1
         uses: actions/cache@v4
@@ -97,20 +108,82 @@ jobs:
           context: ./backend1
           file: ./backend1/Dockerfile
           push: true
+          load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-backend1
           cache-to: type=local,dest=/tmp/.buildx-cache-backend1
       
+      #.....................creating artifacts of docker images and uploading in tar......................................#
+
+      - name: Pull backend1 image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest   
+      
+      - name: Save Docker image for backend1
+        run: |
+          docker save ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:dev-latest -o backend1.tar
+
+      - name: Upload backend1 image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend1-image
+          path: backend1.tar
+
+
+      
+      #...........................................................#
+     
       - name: Build and Push Backend2 Image
         uses: docker/build-push-action@v5
         with:
           context: ./backend2
           file: ./backend2/Dockerfile
           push: true
+          load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest
           cache-from: type=local,src=/tmp/.buildx-cache-backend2
           cache-to: type=local,dest=/tmp/.buildx-cache-backend2
+
+        #-----------------------------------------#
+      
+      - name: Pull backend2 image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest 
+      
+      - name: Save Docker image for backend2
+        run: |
+          docker save ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:dev-latest -o backend2.tar
+
+      - name: Upload backend2 image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend2-image
+          path: backend2.tar
+    #----------------------------------------------#
+      
+      
+      
+      - name: Save backend1 source artifact
+        run: |
+          mkdir -p artifacts/backend1
+          find backend1/src -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/backend1/ \;
+        
+      - name: Save backend2 source artifact
+        run: |
+          mkdir -p artifacts/backend2
+          find backend2/src -type f ! -regex '.*[:\"<>|*?].*' -exec cp --parents {} artifacts/backend2/ \;
+
+        
+      - name: Upload backend1 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend1-artifact
+          path: artifacts/backend1
+
+      - name: Upload backend2 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend2-artifact
+          path: artifacts/backend2
