@@ -1,18 +1,15 @@
-name: Release
+name: Release and Docker Push
 
 on:
   push:
     branches:
       - main
-  
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      REGISTRY: docker.io
-      BACKEND1_IMAGE_NAME: samikshap85/backend1
-      BACKEND2_IMAGE_NAME: samikshap85/backend2
-      FRONTEND_IMAGE_NAME: samikshap85/frontend
+    outputs:
+      release_version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,21 +25,23 @@ jobs:
         run: npm install semantic-release @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator
 
       - name: Run Semantic Release
+        id: get_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release > release.log
-          VERSION=$(grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' release.log || true)
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          VERSION=$(grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' release.log || echo "")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Extract release version
-        id: version
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-  
   docker:
     runs-on: ubuntu-latest
     needs: release
-    if: env.RELEASE_VERSION != ''
+    if: needs.release.outputs.release_version != ''
+    env:
+      REGISTRY: docker.io
+      BACKEND1_IMAGE_NAME: samikshap85/backend1
+      BACKEND2_IMAGE_NAME: samikshap85/backend2
+      FRONTEND_IMAGE_NAME: samikshap85/frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -65,7 +64,7 @@ jobs:
           file: ./backend1/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:${{ needs.release.outputs.release_version }}
             ${{ env.REGISTRY }}/${{ env.BACKEND1_IMAGE_NAME }}:latest
 
       - name: Build and Push Backend2
@@ -75,7 +74,7 @@ jobs:
           file: ./backend2/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:${{ needs.release.outputs.release_version }}
             ${{ env.REGISTRY }}/${{ env.BACKEND2_IMAGE_NAME }}:latest
 
       - name: Build and Push Frontend
@@ -85,6 +84,5 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ needs.release.outputs.release_version }}
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
-            
