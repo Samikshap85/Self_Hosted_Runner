@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Trivy (Fedora)
+      - name: Install Trivy
         run: |
           if ! command -v trivy &> /dev/null; then
             echo " Installing Trivy..."
@@ -40,25 +40,6 @@ jobs:
               "docker.io/samikshap85/$img:dev-latest"
           done
 
-      
-      # - name: Run Trivy scan on backend1 image
-      #   run: |
-      #     mkdir -p trivy-reports
-      #     trivy image --format html --output trivy-reports/backend1.html docker.io/samikshap85/backend1:dev-latest
-
-      # - name: Run Trivy scan on backend2 image
-      #   run: |
-      #     trivy image --format html --output trivy-reports/backend2.html docker.io/samikshap85/backend2:dev-latest
-
-      # - name: Run Trivy scan on frontend image
-      #   run: |
-      #     trivy image --format html --output trivy-reports/frontend.html docker.io/samikshap85/frontend:dev-latest
-
-      # - name: Upload Trivy reports as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: trivy-html-reports
-      #     path: trivy-reports
       
       - name: Create index page for scan reports
         run: |
