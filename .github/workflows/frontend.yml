@@ -101,7 +101,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          # load: true
+          load: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest
@@ -109,6 +109,9 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-frontend
       
       #------------------------------------------------------#
+      - name: Pull frontend image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest   
+      
       - name: Save Docker image for frontend
         run: |
           docker save ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest -o frontend.tar
