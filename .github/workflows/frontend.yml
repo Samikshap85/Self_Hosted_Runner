@@ -108,6 +108,17 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-frontend
           cache-to: type=local,dest=/tmp/.buildx-cache-frontend
       
+      #------------------------------------------------------#
+      - name: Save Docker image for frontend
+        run: |
+          docker save ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:dev-latest -o frontend.tar
+
+      - name: Upload frontend image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-image
+          path: frontend.tar
+      #------------------------------------------------------#
       
       - name: Save frontend build artifact
         run: |
