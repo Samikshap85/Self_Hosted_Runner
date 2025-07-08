@@ -26,10 +26,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          if [[ "${{ github.event.inputs.action }}" == "migrate" ]]; then
-            psql $DATABASE_URL -f migrations/up.sql
+          ACTION="${{ github.event.inputs.action }}"
+          if [[ "$ACTION" == "migrate" ]]; then
+            psql "$DATABASE_URL" -f migrations/up.sql
           else
-            psql $DATABASE_URL -f migrations/down.sql
+            psql "$DATABASE_URL" -f migrations/down.sql
           fi
-          
-          
