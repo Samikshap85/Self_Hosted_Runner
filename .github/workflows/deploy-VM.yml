@@ -1,0 +1,36 @@
+name: Deploy to VM
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: virtual_machine
+    steps:
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_SSH_HOST }}
+          username: ${{ secrets.VM_SSH_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            echo " Logging into Docker..."
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+
+            echo " Pulling latest images..."
+            docker pull samikshap85/backend1:latest
+            docker pull samikshap85/backend2:latest
+            docker pull samikshap85/frontend:latest
+
+            echo " Restarting containers..."
+            docker stop backend1 || true && docker rm backend1 || true
+            docker run -d --name backend1 -p 8001:8001 samikshap85/backend1:latest
+
+            docker stop backend2 || true && docker rm backend2 || true
+            docker run -d --name backend2 -p 8002:8002 samikshap85/backend2:latest
+
+            docker stop frontend || true && docker rm frontend || true
+            docker run -d --name frontend -p 3000:3000 samikshap85/frontend:latest
+
+            echo "Deployment Complete"
