@@ -55,7 +55,6 @@ function App() {
                               <a href="/artifacts/backend1.tar" download>Download Backend1 Image</a><br />
                               <a href="/artifacts/backend2.tar" download>Download Backend2 Image</a>
                                 </div>
-
                               <Button
                                 variant="contained"
                                 color="primary"
