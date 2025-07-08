@@ -1,0 +1,33 @@
+name: PostgreSQL Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'migrate'
+        type: choice
+        options:
+          - migrate
+          - rollback
+
+jobs:
+  db-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Run DB Migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [[ "${{ github.event.inputs.action }}" == "migrate" ]]; then
+            psql $DATABASE_URL -f migrations/up.sql
+          else
+            psql $DATABASE_URL -f migrations/down.sql
+          fi
