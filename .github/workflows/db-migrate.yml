@@ -30,4 +30,5 @@ jobs:
             psql $DATABASE_URL -f migrations/up.sql
           else
             psql $DATABASE_URL -f migrations/down.sql
-          fi
+          
+          
