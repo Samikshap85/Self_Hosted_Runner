@@ -89,3 +89,4 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ needs.release.outputs.release_version }}
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+            
