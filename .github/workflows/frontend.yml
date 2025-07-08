@@ -24,23 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Conventional Commit Check
-        uses: wagoid/commitlint-github-action@v5
-      
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: "20"
-      #     cache: 'yarn'
-      #     cache-dependency-path: ./frontend/yarn.lock
-      # - name: Install Commitlint
-      #   run: |
-      #     npm install --save-dev @commitlint/cli @commitlint/config-conventional
-      # - name: Add commitlint config
-      #   run: |
-      #     echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
-      # - name: Run Commitlint
-      #   run: |
-      #     git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | npx commitlint
+        uses: wagoid/commitlint-github-action@v5      
       
   check_lint:
     runs-on: [frontend]
@@ -137,21 +121,4 @@ jobs:
       
       #---------------------------------------------------------------#
       
-      - name: Download frontend image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-image
-          path: frontend/public/artifacts/
-
-      - name: Download backend1 image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend1-image
-          path: frontend/public/artifacts/
-
-      - name: Download backend2 image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend2-image
-          path: frontend/public/artifacts/
       
