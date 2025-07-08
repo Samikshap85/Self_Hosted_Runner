@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+    workflow_dispatch:
 
 jobs:
   deploy:
@@ -11,9 +12,9 @@ jobs:
       - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VM_SSH_HOST }}
-          username: ${{ secrets.VM_SSH_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             echo " Logging into Docker..."
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
