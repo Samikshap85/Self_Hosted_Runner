@@ -1,0 +1,56 @@
+services:
+  backend1:
+    profile: backend1
+    image: samikshap85/backend1:v4
+    container_name: backend1_container
+    ports:
+      - 3000:3000
+    networks:
+      - fellowship_network
+    depends_on:
+      - postgres
+    environment:
+      - PORT=3000
+    
+  backend2:
+    profile: backend2
+    image: samikshap85/backend2:v4
+    container_name: backend2_container
+    ports:
+      - 3001:3001
+    networks:
+      - fellowship_network
+    depends_on:
+      - postgres
+    environment:
+      - PORT=3001
+    
+  frontend:
+    profile: frontend
+    image: samikshap85/frontend:v4
+    container_name: frontend_container
+    ports:
+      - 80:80
+    networks:
+      - fellowship_network
+    depends_on:
+      - backend1
+      - backend2
+      - postgres
+  postgres:
+    profile: database
+    image: postgres:17.5-alpine
+    container_name: database-container
+    ports:
+      - 5432:5432
+    env_file: ./database/.env
+    networks:
+      - fellowship_network
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    
+networks:
+  fellowship_network:
+    driver: bridge
+volumes:
+  db_volume:

@@ -1,34 +1,32 @@
-name: PostgreSQL Migrations
+name: migrate
 
 on:
   workflow_dispatch:
     inputs:
-      action:
-        description: 'Action to perform'
+      target:
+        description: "Select backend to migrate"
         required: true
-        default: 'migrate'
+        default: "backend1"
         type: choice
         options:
-          - migrate
-          - rollback
+          - backend1
+          - backend2
 
 jobs:
-  db-migration:
-    runs-on: ubuntu-latest
+  migrate_db:
+    runs-on: [backend]
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up PostgreSQL client
-        run: sudo apt-get install -y postgresql-client
-
-      - name: Run DB Migration
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: migrate backend1
+        if: ${{ github.event.inputs.target == 'backend1' }}
         run: |
-          ACTION="${{ github.event.inputs.action }}"
-          if [[ "$ACTION" == "migrate" ]]; then
-            psql "$DATABASE_URL" -f migrations/up.sql
-          else
-            psql "$DATABASE_URL" -f migrations/down.sql
-          fi
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+             cd /home/samiksha/production
+            docker compose exec backend1 yarn migrate
+
+      - name: migrate backend2
+        if: ${{ github.event.inputs.target == 'backend2' }}
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/samiksha/production
+            docker compose exec backend2 yarn migrate

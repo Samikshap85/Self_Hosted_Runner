@@ -1,0 +1,29 @@
+deploy_frontend:
+    needs:
+      - release-frontend
+      - build-and-push-frontend
+      - detect-changes
+    runs-on: [self-hosted, backend]
+    if: needs.detect-changes.outputs.frontend == 'true'
+    steps:
+      - name: SSH and deploy
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/susil/prod
+            docker compose pull frontend
+            docker compose --profile frontend up -d
+    
+deploy_backend1:
+    needs:
+      - release-backend1
+      - build-and-push-backend1
+      - detect-changes
+    runs-on: [backend]
+    if: needs.detect-changes.outputs.backend == 'true'
+    steps:
+      - name: SSH and deploy
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/susil/prod
+            docker compose pull backend1
+            docker compose --profile backend1 up -d
