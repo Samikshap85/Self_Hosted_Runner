@@ -104,7 +104,7 @@ jobs:
             docker compose pull frontend
             docker compose --profile frontend up -d
     
-deploy_backend1:
+  deploy_backend1:
 
     needs:
       - release
@@ -118,7 +118,7 @@ deploy_backend1:
             docker compose pull backend1
             docker compose --profile backend1 up -d
 
-deploy_backend2:
+  deploy_backend2:
     needs:
       - release
       - docker
