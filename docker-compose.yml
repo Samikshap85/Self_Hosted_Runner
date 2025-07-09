@@ -1,7 +1,7 @@
 services:
   backend1:
     profile: backend1
-    image: samikshap85/backend1:v4
+    image: samikshap85/backend1:latest
     container_name: backend1_container
     ports:
       - 3000:3000
@@ -14,7 +14,7 @@ services:
     
   backend2:
     profile: backend2
-    image: samikshap85/backend2:v4
+    image: samikshap85/backend2:latest
     container_name: backend2_container
     ports:
       - 3001:3001
@@ -27,7 +27,7 @@ services:
     
   frontend:
     profile: frontend
-    image: samikshap85/frontend:v4
+    image: samikshap85/frontend:latest
     container_name: frontend_container
     ports:
       - 80:80
