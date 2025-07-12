@@ -1,0 +1,64 @@
+name: Semgrep Scan
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  semgrep-scan:
+    runs-on: [frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Semgrep
+        runs: pip install semgrep
+
+      - name: Run Semgrep on entire repo
+        runs: |
+          mkdir -p semgrep-reports
+
+        semgrep --config=auto --error \
+        --sarif --output=semgrep-reports/report.sarif \
+        --html --output=semgrep-reports/report.html \
+
+        echo "Findings count:" $(jq '.runs[0].results | length' semgrep-reports/report.sarif)
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-reports
+          path: semgrep-reports/
+      
+  deploy-reports:
+    needs: semgrep-scan
+    runs-on: frontend
+    if: github.ref == 'refs/head/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: semgrep-reports
+          path: semgrep-reports
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v3
+      
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: semgrep-reports/
+      
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
+      
+
+
+
