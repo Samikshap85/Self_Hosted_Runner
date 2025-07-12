@@ -8,57 +8,54 @@ on:
 
 jobs:
   semgrep-scan:
-    runs-on: [frontend]
+    runs-on: frontend  # or 'frontend' if that's your custom runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Semgrep
-        runs: pip install semgrep
+      - name: Install Semgrep and jq
+        run: |
+          pip install semgrep
+          sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Run Semgrep on entire repo
-        runs: |
+      - name: Run full Semgrep scan
+        run: |
+          semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
+
+      - name: Generate simple HTML report
+        run: |
           mkdir -p semgrep-reports
+          echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/semgrep-report.html
+          cat semgrep-report.json | jq '.' >> semgrep-reports/semgrep-report.html
+          echo '</pre></body></html>' >> semgrep-reports/semgrep-report.html
+          cp semgrep-report.json semgrep-reports/
 
-        semgrep --config=auto --error \
-        --sarif --output=semgrep-reports/report.sarif \
-        --html --output=semgrep-reports/report.html \
-
-        echo "Findings count:" $(jq '.runs[0].results | length' semgrep-reports/report.sarif)
-      
-      - name: Upload artifacts
+      - name: Upload report as artifact
         uses: actions/upload-artifact@v3
         with:
           name: semgrep-reports
-          path: semgrep-reports/
-      
+          path: semgrep-reports
+
   deploy-reports:
     needs: semgrep-scan
-    runs-on: frontend
-    if: github.ref == 'refs/head/main'
+    runs-on: frontend  # or 'frontend' if that's your custom runner
+    if: github.ref == 'refs/heads/dev'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: semgrep-reports
           path: semgrep-reports
 
-      - name: Set up GitHub Pages
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v3
-      
+
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v1
         with:
-          path: semgrep-reports/
-      
+          path: semgrep-reports
+
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
-      
-
-
-
