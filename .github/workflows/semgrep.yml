@@ -1,9 +1,8 @@
-name: Semgrep Scan
+name: Semgrep Scan and Report Deploy
 
 on:
   push:
     branches: [dev]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -27,36 +26,14 @@ jobs:
       - name: Generate HTML report
         run: |
           mkdir -p semgrep-reports
-          echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/semgrep-report.html
-          cat semgrep-report.json | jq '.' >> semgrep-reports/semgrep-report.html
-          echo '</pre></body></html>' >> semgrep-reports/semgrep-report.html
-          cp semgrep-report.json semgrep-reports/
+          echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/index.html
+          cat semgrep-report.json | jq '.' >> semgrep-reports/index.html
+          echo '</pre></body></html>' >> semgrep-reports/index.html
 
-      - name: Upload Semgrep reports as artifact
-        uses: actions/upload-artifact@v4
+      - name: Deploy to GitHub Pages via gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: semgrep-reports
-          path: semgrep-reports/
-
-  deploy-reports:
-    needs: semgrep-scan
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'dev' && github.event_name == 'push'
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: semgrep-reports
-          path: semgrep-reports
-
-      - name: Set up GitHub Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: semgrep-reports
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: semgrep-reports
+          publish_branch: gh-pages
+          destination_dir: semgrep/scan
