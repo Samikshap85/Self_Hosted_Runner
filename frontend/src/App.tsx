@@ -42,7 +42,7 @@ function App() {
                             }}
                           >
                             <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-                              Please sign in to continue-Semgrep!!!
+                              Please sign in to continue - test semgrep
                             </Typography>
                             <SignInButton
                               mode="modal"
