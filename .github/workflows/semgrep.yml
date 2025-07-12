@@ -66,8 +66,7 @@ jobs:
       - name: Get list of changed files
         id: changes
         run: |
-          CHANGED=$(git diff --name-only origin/main...HEAD | grep -E '\.js$|\.ts$|\.jsx$|\.tsx$' || true)
-          echo "Changed files:"
+          CHANGED=$(git diff --name-only origin/main...HEAD || true) 
           echo "$CHANGED"
           echo "files=$CHANGED" >> "$GITHUB_OUTPUT"
 
