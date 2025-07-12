@@ -39,9 +39,8 @@ jobs:
 
   deploy-reports:
     needs: semgrep-scan
-    runs-on: ubuntu-latest  # or 'frontend' if you have a self-hosted runner
-    if: github.ref == 'refs/heads/dev'
-
+    runs-on: frontend
+    if: github.event_name == 'push' && github.ref_name == 'dev'
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
