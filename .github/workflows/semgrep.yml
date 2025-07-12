@@ -14,14 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Semgrep and jq
+      - name: Install Semgrep and jq (Fedora)
         run: |
-          pip install semgrep
-          sudo apt-get update && sudo apt-get install -y jq
+          sudo dnf install -y python3-pip jq
+          pip3 install --user semgrep
 
       - name: Run Semgrep scan
         run: |
-          semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
+          ~/.local/bin/semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
 
       - name: Generate HTML report
         run: |
