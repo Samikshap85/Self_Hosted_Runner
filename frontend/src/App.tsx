@@ -10,6 +10,21 @@ const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const theme = createTheme();
 
 function App() {
+
+  // Vulnerable: disable TLS verification (for demo only)
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+  // Vulnerable: eval usage
+  eval("console.log('This is a dangerous eval')");
+
+  // Vulnerable: hardcoded secret
+  const API_KEY = "12345-SECRET-KEY";
+
+  // Vulnerable: dangerouslySetInnerHTML
+  const userInput = "<img src=x onerror=alert('XSS') />";
+
+  // -----------------------------------------------------
+
   return (
     <ClerkProvider publishableKey={clerkPublishableKey}>
       <ThemeProvider theme={theme}>
@@ -42,7 +57,7 @@ function App() {
                             }}
                           >
                             <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-                              Please sign in to continue - testing for semgre scan on change file
+                              Please sign in to continue - testing for semgre scan on change
                             <SignInButton
                               mode="modal"
                               redirectUrl="/blogs/create"
