@@ -1,4 +1,50 @@
-name: Semgrep Scan
+# name: Semgrep Scan and Report Deploy
+
+# on:
+#   push:
+#     branches: [dev]
+#   workflow_dispatch:
+
+# jobs:
+#   semgrep-scan:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Install Semgrep
+#         run: pip install semgrep
+
+#       - name: Install jq
+#         run: sudo apt-get update && sudo apt-get install -y jq
+
+#       - name: Run Semgrep scan
+#         run: |
+#           semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
+
+#       - name: Generate HTML report from JSON
+#         run: |
+#           mkdir -p semgrep-reports
+#           python3 generate_html_report.py
+#           cp semgrep-report.json semgrep-reports/
+
+#       - name: Upload Semgrep reports as artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: semgrep-reports
+#           path: semgrep-reports/
+
+#       - name: Deploy to GitHub Pages via gh-pages branch
+#         uses: peaceiris/actions-gh-pages@v3
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_dir: semgrep-reports
+#           publish_branch: gh-pages
+#           destination_dir: semgrep/scan
+
+
+name: Semgrep Scan (Changed Files Only)
 
 on:
   push:
@@ -7,55 +53,48 @@ on:
   workflow_dispatch:
 
 jobs:
-  semgrep-scan:
-    runs-on: ubuntu-latest  # or 'frontend' if you're using a custom runner
+  semgrep-changed:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: Install Semgrep and jq
+      - name: Fetch base branch for diff
+        run: git fetch origin main
+
+      - name: Get list of changed files
+        id: changes
         run: |
-          pip install semgrep
-          sudo apt-get update && sudo apt-get install -y jq
+          CHANGED=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|jsx|ts|tsx)$' || true)
+          echo "Changed files:"
+          echo "$CHANGED"
+          # Replace newlines with spaces for valid GitHub output
+          CHANGED_LIST=$(echo "$CHANGED" | tr '\n' ' ')
+          echo "files=$CHANGED_LIST" >> "$GITHUB_OUTPUT"
 
-      - name: Run full Semgrep scan
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep only on changed files
+        if: steps.changes.outputs.files != ''
         run: |
-          semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
+          echo "${{ steps.changes.outputs.files }}" | xargs semgrep \
+            --config "p/javascript" --config "p/react" --config "p/nodejs" --json > semgrep-report.json
 
-      - name: Generate simple HTML report
+      - name: Generate HTML report
+        if: steps.changes.outputs.files != ''
         run: |
           mkdir -p semgrep-reports
-          echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/semgrep-report.html
-          cat semgrep-report.json | jq '.' >> semgrep-reports/semgrep-report.html
-          echo '</pre></body></html>' >> semgrep-reports/semgrep-report.html
+          python3 generate_html_report.py
           cp semgrep-report.json semgrep-reports/
 
-      - name: Upload report as artifact
+      - name: Upload Semgrep reports as artifact
+        if: steps.changes.outputs.files != ''
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-reports
           path: semgrep-reports/
-
-  deploy-reports:
-    needs: semgrep-scan
-    runs-on: ubuntu-latest  # or 'frontend' if you have a self-hosted runner
-    if: github.ref == 'refs/heads/dev'
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: semgrep-reports
-          path: semgrep-reports
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: semgrep-reports
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
