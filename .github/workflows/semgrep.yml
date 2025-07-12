@@ -23,12 +23,17 @@ jobs:
         run: |
           semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
 
-      - name: Generate HTML report
+      - name: Generate HTML report from JSON
         run: |
           mkdir -p semgrep-reports
-          echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/index.html
-          cat semgrep-report.json | jq '.' >> semgrep-reports/index.html
-          echo '</pre></body></html>' >> semgrep-reports/index.html
+          python3 generate_html_report.py
+          cp semgrep-report.json semgrep-reports/
+
+      - name: Upload Semgrep reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-reports
+          path: semgrep-reports/
 
       - name: Deploy to GitHub Pages via gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
