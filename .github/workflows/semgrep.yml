@@ -97,3 +97,11 @@ jobs:
         with:
           name: semgrep-reports
           path: semgrep-reports/
+      
+      - name: Deploy to GitHub Pages via gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: semgrep-reports
+          publish_branch: gh-pages
+          destination_dir: semgrep/scan
