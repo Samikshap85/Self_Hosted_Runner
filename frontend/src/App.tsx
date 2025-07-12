@@ -42,7 +42,7 @@ function App() {
                             }}
                           >
                             <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-                              Please sign in to continue - test 
+                              Please sign in to continue - testing for semgre scan on change file
                             <SignInButton
                               mode="modal"
                               redirectUrl="/blogs/create"

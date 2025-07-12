@@ -71,7 +71,9 @@ jobs:
         run: |
           CHANGED=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|jsx|ts|tsx)$' || true)
           echo "$CHANGED"
-          echo "files=$CHANGED" >> "$GITHUB_OUTPUT"
+          CHANGED_SINGLE_LINE=$(echo "$CHANGED" | tr '\n' ' ' | sed 's/ $//')
+          echo "files=$CHANGED_SINGLE_LINE" >> "$GITHUB_OUTPUT"
+
 
       - name: Install Semgrep
         run: pip install semgrep
@@ -95,3 +97,11 @@ jobs:
         with:
           name: semgrep-reports
           path: semgrep-reports/
+      
+      - name: Deploy to GitHub Pages via gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: semgrep-reports
+          publish_branch: gh-pages
+          destination_dir: semgrep/scan
