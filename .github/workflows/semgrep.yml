@@ -8,7 +8,7 @@ on:
 
 jobs:
   semgrep-scan:
-    runs-on: frontend  # or 'frontend' if that's your custom runner
+    runs-on: ubuntu-latest  # or 'frontend' if you're using a custom runner
 
     steps:
       - name: Checkout code
@@ -32,19 +32,19 @@ jobs:
           cp semgrep-report.json semgrep-reports/
 
       - name: Upload report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-reports
-          path: semgrep-reports
+          path: semgrep-reports/
 
   deploy-reports:
     needs: semgrep-scan
-    runs-on: frontend  # or 'frontend' if that's your custom runner
+    runs-on: ubuntu-latest  # or 'frontend' if you have a self-hosted runner
     if: github.ref == 'refs/heads/dev'
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: semgrep-reports
           path: semgrep-reports
