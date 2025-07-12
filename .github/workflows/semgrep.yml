@@ -8,7 +8,7 @@ on:
 
 jobs:
   semgrep-scan:
-    runs-on: ubuntu-latest  # or 'frontend' if you're using a custom runner
+    runs-on: frontend
 
     steps:
       - name: Checkout code
@@ -19,11 +19,11 @@ jobs:
           pip install semgrep
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Run full Semgrep scan
+      - name: Run Semgrep scan
         run: |
           semgrep --config "p/javascript" --config "p/react" --config "p/nodejs" . --json > semgrep-report.json
 
-      - name: Generate simple HTML report
+      - name: Generate HTML report
         run: |
           mkdir -p semgrep-reports
           echo '<html><head><meta charset="UTF-8"><title>Semgrep Report</title></head><body><h1>Semgrep Report</h1><pre>' > semgrep-reports/semgrep-report.html
@@ -31,7 +31,7 @@ jobs:
           echo '</pre></body></html>' >> semgrep-reports/semgrep-report.html
           cp semgrep-report.json semgrep-reports/
 
-      - name: Upload report as artifact
+      - name: Upload Semgrep reports as artifact
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-reports
@@ -41,14 +41,15 @@ jobs:
     needs: semgrep-scan
     runs-on: frontend
     if: github.event_name == 'push' && github.ref_name == 'dev'
+
     steps:
-      - name: Download artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: semgrep-reports
           path: semgrep-reports
 
-      - name: Setup GitHub Pages
+      - name: Set up GitHub Pages
         uses: actions/configure-pages@v3
 
       - name: Upload to GitHub Pages
