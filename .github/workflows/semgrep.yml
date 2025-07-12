@@ -70,11 +70,10 @@ jobs:
         id: changes
         run: |
           CHANGED=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|jsx|ts|tsx)$' || true)
-          echo "Changed files:"
           echo "$CHANGED"
-          # Replace newlines with spaces for valid GitHub output
-          CHANGED_LIST=$(echo "$CHANGED" | tr '\n' ' ')
-          echo "files=$CHANGED_LIST" >> "$GITHUB_OUTPUT"
+          CHANGED_SINGLE_LINE=$(echo "$CHANGED" | tr '\n' ' ' | sed 's/ $//')
+          echo "files=$CHANGED_SINGLE_LINE" >> "$GITHUB_OUTPUT"
+
 
       - name: Install Semgrep
         run: pip install semgrep
